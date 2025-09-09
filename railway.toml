@@ -1,0 +1,9 @@
+# Railway will auto-use the Dockerfile; this file makes intent explicit.
+
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+restartPolicy = "on_failure"
+restartPolicyMaxRetries = 3

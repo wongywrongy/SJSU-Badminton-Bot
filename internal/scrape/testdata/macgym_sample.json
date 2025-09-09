@@ -1,0 +1,22 @@
+{
+  "success": true,
+  "message": "Data retrieved successfully",
+  "data": [
+    {
+      "locationId": "mac-gym-001",
+      "locationName": "Mac Gym - Badminton Courts",
+      "currentCount": 6,
+      "maxCapacity": 8,
+      "status": "active",
+      "lastUpdated": "2024-01-15T14:30:00Z"
+    },
+    {
+      "locationId": "mac-gym-002", 
+      "locationName": "Mac Gym - Basketball Courts",
+      "currentCount": 12,
+      "maxCapacity": 20,
+      "status": "active",
+      "lastUpdated": "2024-01-15T14:30:00Z"
+    }
+  ]
+}
