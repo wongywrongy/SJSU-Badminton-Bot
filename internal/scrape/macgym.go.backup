@@ -3,7 +3,6 @@ package scrape
 import (
     "context"
     "fmt"
-    "io"
     "log/slog"
     "strings"
     "time"
@@ -28,45 +27,21 @@ type MacGymResponse struct {
 
 // FetchMacGym fetches and parses Mac Gym occupancy data
 func FetchMacGym(ctx context.Context, url string) (store.MacGymSnapshot, error) {
-    slog.Info("Fetching Mac Gym data", "url", url, "version", "v2.2")
+    slog.Info("Fetching Mac Gym data", "url", url)
     
     r, err := util.Get(ctx, url)
     if err != nil {
-        slog.Warn("Failed to fetch Mac Gym data, using fallback", "error", err)
-        return CreateFallbackMacGymData(), nil
+        return store.MacGymSnapshot{}, fmt.Errorf("fetching Mac Gym data: %w", err)
     }
     defer r.Body.Close()
 
-    // Check if response is HTML (API might have changed)
-    contentType := r.Header.Get("Content-Type")
-    if strings.Contains(contentType, "text/html") {
-        slog.Warn("Mac Gym API returned HTML instead of JSON, using fallback data")
-        return CreateFallbackMacGymData(), nil
-    }
-
-    // Read the response body to check content
-    bodyBytes, err := io.ReadAll(r.Body)
-    if err != nil {
-        slog.Warn("Failed to read Mac Gym response body, using fallback", "error", err)
-        return CreateFallbackMacGymData(), nil
-    }
-    
-    // Check if response is HTML
-    bodyStr := string(bodyBytes)
-    if strings.HasPrefix(strings.TrimSpace(bodyStr), "<") {
-        slog.Warn("Mac Gym API returned HTML instead of JSON, using fallback data")
-        return CreateFallbackMacGymData(), nil
-    }
-    
     var response MacGymResponse
-    if err := util.DecodeJSON(strings.NewReader(bodyStr), &response); err != nil {
-        slog.Warn("Failed to decode Mac Gym JSON, using fallback", "error", err)
-        return CreateFallbackMacGymData(), nil
+    if err := util.DecodeJSON(r.Body, &response); err != nil {
+        return store.MacGymSnapshot{}, fmt.Errorf("decoding Mac Gym response: %w", err)
     }
 
     if !response.Success {
-        slog.Warn("Mac Gym API returned error, using fallback", "message", response.Message)
-        return CreateFallbackMacGymData(), nil
+        return store.MacGymSnapshot{}, fmt.Errorf("API returned error: %s", response.Message)
     }
 
     snap := store.MacGymSnapshot{
