@@ -32,41 +32,41 @@ func FetchMacGym(ctx context.Context, url string) (store.MacGymSnapshot, error) 
     
     r, err := util.Get(ctx, url)
     if err != nil {
-        slog.Warn("Failed to fetch Mac Gym data, using fallback", "error", err)
-        return CreateFallbackMacGymData(), nil
+        slog.Error("Failed to fetch Mac Gym data, using fallback", "error", err)
+        return store.MacGymSnapshot{}, fmt.Errorf("API returned HTML instead of JSON - cannot extract real occupancy data")
     }
     defer r.Body.Close()
 
     // Check if response is HTML (API might have changed)
     contentType := r.Header.Get("Content-Type")
     if strings.Contains(contentType, "text/html") {
-        slog.Warn("Mac Gym API returned HTML instead of JSON, using fallback data")
-        return CreateFallbackMacGymData(), nil
+        slog.Error("Mac Gym API returned HTML instead of JSON, cannot extract real data")
+        return store.MacGymSnapshot{}, fmt.Errorf("API returned HTML instead of JSON - cannot extract real occupancy data")
     }
 
     // Read the response body to check content
     bodyBytes, err := io.ReadAll(r.Body)
     if err != nil {
-        slog.Warn("Failed to read Mac Gym response body, using fallback", "error", err)
-        return CreateFallbackMacGymData(), nil
+        slog.Error("Failed to read Mac Gym response body, using fallback", "error", err)
+        return store.MacGymSnapshot{}, fmt.Errorf("API returned HTML instead of JSON - cannot extract real occupancy data")
     }
     
     // Check if response is HTML
     bodyStr := string(bodyBytes)
     if strings.HasPrefix(strings.TrimSpace(bodyStr), "<") {
-        slog.Warn("Mac Gym API returned HTML instead of JSON, using fallback data")
-        return CreateFallbackMacGymData(), nil
+        slog.Error("Mac Gym API returned HTML instead of JSON, cannot extract real data")
+        return store.MacGymSnapshot{}, fmt.Errorf("API returned HTML instead of JSON - cannot extract real occupancy data")
     }
     
     var response MacGymResponse
     if err := util.DecodeJSON(strings.NewReader(bodyStr), &response); err != nil {
-        slog.Warn("Failed to decode Mac Gym JSON, using fallback", "error", err)
-        return CreateFallbackMacGymData(), nil
+        slog.Error("Failed to decode Mac Gym JSON, using fallback", "error", err)
+        return store.MacGymSnapshot{}, fmt.Errorf("API returned HTML instead of JSON - cannot extract real occupancy data")
     }
 
     if !response.Success {
-        slog.Warn("Mac Gym API returned error, using fallback", "message", response.Message)
-        return CreateFallbackMacGymData(), nil
+        slog.Error("Mac Gym API returned error, using fallback", "message", response.Message)
+        return store.MacGymSnapshot{}, fmt.Errorf("API returned HTML instead of JSON - cannot extract real occupancy data")
     }
 
     snap := store.MacGymSnapshot{
