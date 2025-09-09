@@ -1,9 +1,9 @@
 FROM golang:1.22 as build
 WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
 COPY . .
-RUN --mount=type=cache,id=cache-go-mod,target=/go/pkg/mod \
-    --mount=type=cache,id=cache-go-build,target=/root/.cache/go-build \
-    go build -o /bot ./cmd/bot
+RUN go build -o /bot ./cmd/bot
 
 FROM gcr.io/distroless/base-debian12
 WORKDIR /
