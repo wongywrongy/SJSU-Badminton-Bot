@@ -25,14 +25,12 @@ func Load() (Config, error) {
         AppID:      get("DISCORD_APP_ID", ""),
         GuildID:    get("DISCORD_GUILD_ID", ""),
         TZ:         get("TIMEZONE", "America/Los_Angeles"),
-        MacGymURL:  get("MACGYM_URL", ""),
-        FitnessURL: get("FITNESS_URL", ""),
+        MacGymURL:  get("MACGYM_URL", "https://www.connect2mycloud.com/Widgets/Data/locationCount?type=circle&key=92833ff9-2797-43ed-98ab-8730784a147f&loc_status=false"),
+        FitnessURL: get("FITNESS_URL", "https://fitness.sjsu.edu/Facility/GetSchedule"),
         CronMacGym: get("REFRESH_MACGYM_CRON", "@every 2m"),
         CronEvents: get("REFRESH_EVENTS_CRON", "@every 30m"),
         AlertChan:  get("ALERT_CHANNEL_ID", ""),
     }
     if c.Token == "" { return c, errors.New("missing DISCORD_BOT_TOKEN") }
-    if c.MacGymURL == "" { return c, errors.New("missing MACGYM_URL") }
-    if c.FitnessURL == "" { return c, errors.New("missing FITNESS_URL") }
     return c, nil
 }
